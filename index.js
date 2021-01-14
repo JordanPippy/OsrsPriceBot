@@ -6,6 +6,7 @@ const bot = new Discord.Client();
 
 const TOKEN = process.env.TOKEN;
 const linkHead = "https://oldschool.runescape.wiki/w/";
+var price = "";
 bot.login(TOKEN);
 
 bot.on('ready', () => {
@@ -31,23 +32,24 @@ bot.on('message', msg => {
             item += ' ';
         item += message[i];
     }
-    visitLink(item);
-    console.log(item);
-    msg.channel.send('pong');
+    visitLink(item, msg);
 });
-
+function sendMessage(msg, data) {
+    msg.channel.send(data);
+}
 function createLink(link) {
     let fullLink = link.replace(/ /g, '_');
     fullLink = linkHead + fullLink;
     return fullLink;
 }
 
-function visitLink(link) {
+function visitLink(link, msg) {
     let fullLink = createLink(link);
-    let price = "";
     request({uri: fullLink}, 
-    function(error, response, body) {
+        function(error, response, body) {
         let index = body.indexOf("data-val-each");
+        console.log("index: " + index);
+        price = "";
         while (true)
         {
             let c = body.charAt(index);
@@ -58,7 +60,8 @@ function visitLink(link) {
             index++;
         }
         price = price.split('=');
-        price = price[1].substring(1, price[1].length - 1);
-        console.log(price);
+        price =(price[1]).substring(1, price[1].length - 1);
+        console.log("price before return: " + price);
+        sendMessage(msg, price);
     });
 }
